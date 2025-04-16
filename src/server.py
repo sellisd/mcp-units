@@ -152,6 +152,10 @@ class CookingUnitsServer:
                 sys.stdout.write('\n')
                 sys.stdout.flush()
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the MCP units server."""
     server = CookingUnitsServer()
     server.run()
+
+if __name__ == "__main__":
+    main()
