@@ -8,6 +8,11 @@ NUMBER_SCHEMA = {
     "minimum": 0
 }
 
+# Schema for temperatures that can be negative
+TEMPERATURE_NUMBER_SCHEMA = {
+    "type": "number"
+}
+
 # Volume conversion schema
 VOLUME_CONVERSION_SCHEMA = {
     "type": "object",
@@ -44,6 +49,24 @@ WEIGHT_CONVERSION_SCHEMA = {
     "additionalProperties": False
 }
 
+# Temperature conversion schema
+TEMPERATURE_CONVERSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "value": TEMPERATURE_NUMBER_SCHEMA,
+        "from_unit": {
+            "type": "string",
+            "enum": ["C", "F"]
+        },
+        "to_unit": {
+            "type": "string",
+            "enum": ["C", "F"]
+        }
+    },
+    "required": ["value", "from_unit", "to_unit"],
+    "additionalProperties": False
+}
+
 def validate_conversion_request(data: Dict[str, Any], schema: Dict[str, Any]) -> Optional[str]:
     """
     Validate a conversion request against a schema.
@@ -61,7 +84,8 @@ def validate_conversion_request(data: Dict[str, Any], schema: Dict[str, Any]) ->
         # Additional validation for value type
         try:
             value = Decimal(str(data["value"]))
-            if value < 0:
+            # Only check for negative values on non-temperature conversions
+            if schema != TEMPERATURE_CONVERSION_SCHEMA and value < 0:
                 return "Value cannot be negative"
         except (InvalidOperation, TypeError):
             return f"Invalid value format: {data['value']}"

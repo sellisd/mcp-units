@@ -6,12 +6,14 @@ from typing import Dict, Any
 
 from converters.volume import convert_volume
 from converters.weight import convert_weight
+from converters.temperature import convert_temperature
 from utils.validation import (
     validate_conversion_request,
     format_error_response,
     format_success_response,
     VOLUME_CONVERSION_SCHEMA,
-    WEIGHT_CONVERSION_SCHEMA
+    WEIGHT_CONVERSION_SCHEMA,
+    TEMPERATURE_CONVERSION_SCHEMA
 )
 
 class CookingUnitsServer:
@@ -20,7 +22,8 @@ class CookingUnitsServer:
     def __init__(self):
         self.tools = {
             "convert_volume": self.handle_volume_conversion,
-            "convert_weight": self.handle_weight_conversion
+            "convert_weight": self.handle_weight_conversion,
+            "convert_temperature": self.handle_temperature_conversion
         }
 
     def list_tools(self) -> Dict[str, Any]:
@@ -36,6 +39,11 @@ class CookingUnitsServer:
                     "name": "convert_weight",
                     "description": "Convert between weight measurements (g, kg, oz, lb)",
                     "inputSchema": WEIGHT_CONVERSION_SCHEMA
+                },
+                {
+                    "name": "convert_temperature",
+                    "description": "Convert between cooking temperature units (C, F)",
+                    "inputSchema": TEMPERATURE_CONVERSION_SCHEMA
                 }
             ]
         }
@@ -64,6 +72,22 @@ class CookingUnitsServer:
 
         try:
             result = convert_weight(
+                args["value"],
+                args["from_unit"],
+                args["to_unit"]
+            )
+            return format_success_response(result, args["to_unit"])
+        except ValueError as e:
+            return format_error_response(str(e))
+
+    def handle_temperature_conversion(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle temperature conversion requests."""
+        error = validate_conversion_request(args, TEMPERATURE_CONVERSION_SCHEMA)
+        if error:
+            return format_error_response(error)
+
+        try:
+            result = convert_temperature(
                 args["value"],
                 args["from_unit"],
                 args["to_unit"]
