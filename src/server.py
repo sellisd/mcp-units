@@ -1,149 +1,83 @@
 #!/usr/bin/env python3
 
 import sys
-import json
-from typing import Dict, Any
+from typing import Dict, Any, List
+from mcp import Tool, McpError, ServerCapabilities, ServerSession, Implementation, stdio_server
 
+from src import __version__
 from converters.volume import convert_volume
 from converters.weight import convert_weight
 from converters.temperature import convert_temperature
 from utils.validation import (
-    validate_conversion_request,
-    format_error_response,
-    format_success_response,
     VOLUME_CONVERSION_SCHEMA,
     WEIGHT_CONVERSION_SCHEMA,
     TEMPERATURE_CONVERSION_SCHEMA,
 )
 
-
-class CookingUnitsServer:
+class CookingUnitsServer(ServerSession):
     """MCP server for cooking unit conversions."""
 
-    def __init__(self):
-        self.tools = {
-            "convert_volume": self.handle_volume_conversion,
-            "convert_weight": self.handle_weight_conversion,
-            "convert_temperature": self.handle_temperature_conversion,
-        }
+    def __init__(self, read_stream, write_stream, init_options):
+        super().__init__(read_stream, write_stream, init_options)
+        self._implementation = Implementation(
+            name="mcp-units",
+            version=__version__,
+            capabilities=ServerCapabilities()
+        )
+        self.register_tools()
 
-    def list_tools(self) -> Dict[str, Any]:
-        """Return the list of available tools."""
-        return {
-            "tools": [
-                {
-                    "name": "convert_volume",
-                    "description": "Convert between volume measurements (ml, l, cup, tbsp, tsp)",
-                    "inputSchema": VOLUME_CONVERSION_SCHEMA,
-                },
-                {
-                    "name": "convert_weight",
-                    "description": "Convert between weight measurements (g, kg, oz, lb)",
-                    "inputSchema": WEIGHT_CONVERSION_SCHEMA,
-                },
-                {
-                    "name": "convert_temperature",
-                    "description": "Convert between cooking temperature units (C, F)",
-                    "inputSchema": TEMPERATURE_CONVERSION_SCHEMA,
-                },
-            ]
-        }
-
-    def handle_volume_conversion(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle volume conversion requests."""
-        error = validate_conversion_request(args, VOLUME_CONVERSION_SCHEMA)
-        if error:
-            return format_error_response(error)
-
-        try:
-            result = convert_volume(args["value"], args["from_unit"], args["to_unit"])
-            return format_success_response(result, args["to_unit"])
-        except ValueError as e:
-            return format_error_response(str(e))
-
-    def handle_weight_conversion(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle weight conversion requests."""
-        error = validate_conversion_request(args, WEIGHT_CONVERSION_SCHEMA)
-        if error:
-            return format_error_response(error)
-
-        try:
-            result = convert_weight(args["value"], args["from_unit"], args["to_unit"])
-            return format_success_response(result, args["to_unit"])
-        except ValueError as e:
-            return format_error_response(str(e))
-
-    def handle_temperature_conversion(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle temperature conversion requests."""
-        error = validate_conversion_request(args, TEMPERATURE_CONVERSION_SCHEMA)
-        if error:
-            return format_error_response(error)
-
-        try:
-            result = convert_temperature(
-                args["value"], args["from_unit"], args["to_unit"]
+    def register_tools(self) -> None:
+        """Register conversion tools with the MCP server."""
+        self._tools: List[Tool] = [
+            Tool(
+                name="convert_volume",
+                description="Convert between volume measurements (ml, l, cup, tbsp, tsp)",
+                inputSchema=VOLUME_CONVERSION_SCHEMA,
+                handler=self.handle_volume_conversion,
+                returns={"type": "number"}
+            ),
+            Tool(
+                name="convert_weight",
+                description="Convert between weight measurements (g, kg, oz, lb)",
+                inputSchema=WEIGHT_CONVERSION_SCHEMA,
+                handler=self.handle_weight_conversion,
+                returns={"type": "number"}
+            ),
+            Tool(
+                name="convert_temperature",
+                description="Convert between cooking temperature units (C, F)",
+                inputSchema=TEMPERATURE_CONVERSION_SCHEMA,
+                handler=self.handle_temperature_conversion,
+                returns={"type": "number"}
             )
-            return format_success_response(result, args["to_unit"])
+        ]
+
+    def handle_volume_conversion(self, args: Dict[str, Any]) -> Any:
+        """Handle volume conversion requests."""
+        try:
+            return convert_volume(args["value"], args["from_unit"], args["to_unit"])
         except ValueError as e:
-            return format_error_response(str(e))
+            raise McpError(str(e))
 
-    def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle incoming MCP requests."""
-        method = request.get("method")
+    def handle_weight_conversion(self, args: Dict[str, Any]) -> Any:
+        """Handle weight conversion requests."""
+        try:
+            return convert_weight(args["value"], args["from_unit"], args["to_unit"])
+        except ValueError as e:
+            raise McpError(str(e))
 
-        if method == "listTools":
-            return self.list_tools()
-
-        if method == "callTool":
-            tool_name = request.get("params", {}).get("name")
-            tool_args = request.get("params", {}).get("arguments", {})
-
-            if not tool_name:
-                return format_error_response("Tool name is required")
-
-            tool_handler = self.tools.get(tool_name)
-            if not tool_handler:
-                return format_error_response(f"Unknown tool: {tool_name}")
-
-            return tool_handler(tool_args)
-
-        return format_error_response(f"Unknown method: {method}")
-
-    def run(self):
-        """Run the MCP server, reading from stdin and writing to stdout."""
-        while True:
-            try:
-                # Read request
-                request_line = sys.stdin.readline()
-                if not request_line:
-                    break
-
-                request = json.loads(request_line)
-
-                # Process request
-                response = self.handle_request(request)
-
-                # Send response
-                json.dump(response, sys.stdout)
-                sys.stdout.write("\n")
-                sys.stdout.flush()
-
-            except json.JSONDecodeError:
-                json.dump(format_error_response("Invalid JSON request"), sys.stdout)
-                sys.stdout.write("\n")
-                sys.stdout.flush()
-            except Exception as e:
-                json.dump(
-                    format_error_response(f"Internal error: {str(e)}"), sys.stdout
-                )
-                sys.stdout.write("\n")
-                sys.stdout.flush()
+    def handle_temperature_conversion(self, args: Dict[str, Any]) -> Any:
+        """Handle temperature conversion requests."""
+        try:
+            return convert_temperature(args["value"], args["from_unit"], args["to_unit"])
+        except ValueError as e:
+            raise McpError(str(e))
 
 
 def main():
     """Entry point for the MCP units server."""
-    server = CookingUnitsServer()
-    server.run()
+    server = CookingUnitsServer(sys.stdin.buffer, sys.stdout.buffer, {})
+    stdio_server(server)
 
 
 if __name__ == "__main__":

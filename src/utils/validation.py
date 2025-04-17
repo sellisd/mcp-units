@@ -1,6 +1,7 @@
 from decimal import Decimal, InvalidOperation
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from jsonschema import validate, ValidationError
+from mcp import McpError
 
 # Common schema components
 NUMBER_SCHEMA = {"type": "number", "minimum": 0}
@@ -44,10 +45,7 @@ TEMPERATURE_CONVERSION_SCHEMA = {
     "additionalProperties": False,
 }
 
-
-def validate_conversion_request(
-    data: Dict[str, Any], schema: Dict[str, Any]
-) -> Optional[str]:
+def validate_conversion_request(data: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """
     Validate a conversion request against a schema.
 
@@ -55,8 +53,8 @@ def validate_conversion_request(
         data: The request data to validate
         schema: The JSON schema to validate against
 
-    Returns:
-        Optional[str]: Error message if validation fails, None if validation succeeds
+    Raises:
+        MCPError: If validation fails
     """
     try:
         validate(instance=data, schema=schema)
@@ -66,20 +64,9 @@ def validate_conversion_request(
             value = Decimal(str(data["value"]))
             # Only check for negative values on non-temperature conversions
             if schema != TEMPERATURE_CONVERSION_SCHEMA and value < 0:
-                return "Value cannot be negative"
+                raise McpError("Value cannot be negative")
         except (InvalidOperation, TypeError):
-            return f"Invalid value format: {data['value']}"
+            raise McpError(f"Invalid value format: {data['value']}")
 
-        return None
     except ValidationError as e:
-        return f"Validation error: {e.message}"
-
-
-def format_error_response(message: str) -> Dict[str, Any]:
-    """Format an error response according to MCP protocol."""
-    return {"content": [{"type": "text", "text": message}], "isError": True}
-
-
-def format_success_response(value: Decimal, unit: str) -> Dict[str, Any]:
-    """Format a successful conversion response according to MCP protocol."""
-    return {"content": [{"type": "text", "text": f"{value} {unit}"}], "isError": False}
+        raise McpError(f"Validation error: {e.message}")
