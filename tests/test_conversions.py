@@ -2,6 +2,7 @@ import pytest
 from decimal import Decimal
 from src.converters import convert_volume, convert_weight
 
+
 def test_volume_conversions():
     """Test various volume conversions"""
     # Test ml to other units
@@ -20,8 +21,9 @@ def test_volume_conversions():
 
     # Test common kitchen equivalences
     assert convert_volume(1, "cup", "tbsp") == Decimal("16.0000")  # 1 cup = 16 tbsp
-    assert convert_volume(1, "tbsp", "tsp") == Decimal("3.0000")   # 1 tbsp = 3 tsp
-    assert convert_volume(1, "cup", "tsp") == Decimal("48.0000")   # 1 cup = 48 tsp
+    assert convert_volume(1, "tbsp", "tsp") == Decimal("3.0000")  # 1 tbsp = 3 tsp
+    assert convert_volume(1, "cup", "tsp") == Decimal("48.0000")  # 1 cup = 48 tsp
+
 
 def test_weight_conversions():
     """Test various weight conversions"""
@@ -37,6 +39,7 @@ def test_weight_conversions():
     # Test kilograms to other units
     assert convert_weight(1, "kg", "g") == Decimal("1000.0000")
     assert convert_weight(1, "kg", "lb") == Decimal("2.2046")
+
 
 def test_invalid_inputs():
     """Test error handling for invalid inputs"""
@@ -58,20 +61,17 @@ def test_invalid_inputs():
     with pytest.raises(ValueError):
         convert_weight("invalid", "g", "kg")
 
+
 def test_roundtrip_conversions():
     """Test that converting back and forth preserves values (within rounding)"""
     # Volume roundtrip
     original_volume = Decimal("5.5")
     converted = convert_volume(
-        convert_volume(original_volume, "cup", "ml"),
-        "ml", "cup"
+        convert_volume(original_volume, "cup", "ml"), "ml", "cup"
     )
     assert abs(converted - original_volume) < Decimal("0.0001")
 
     # Weight roundtrip
     original_weight = Decimal("10.5")
-    converted = convert_weight(
-        convert_weight(original_weight, "lb", "g"),
-        "g", "lb"
-    )
+    converted = convert_weight(convert_weight(original_weight, "lb", "g"), "g", "lb")
     assert abs(converted - original_weight) < Decimal("0.0001")
