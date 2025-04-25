@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-units"
-version = "0.1.0"
+version = "0.2.0"
 description = "An MCP server for cooking unit conversions"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -17,6 +17,7 @@ dependencies = [
     "jsonschema>=4.0.0",
     "pytest>=7.4.4",
     "ruff>=0.11.5",
+    "mcp==1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -25,10 +26,13 @@ dev = [
 ]
 
 [project.scripts]
-mcp-units = "src.server:main"
+mcp-units = "mcp_units.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["mcp_units"]
+
+[tool.hatch.build]
+packages = ["mcp_units"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
