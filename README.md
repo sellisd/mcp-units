@@ -1,9 +1,20 @@
 # MCP Cooking Units Converter
 
+[![smithery badge](https://smithery.ai/badge/@sellisd/mcp-units)](https://smithery.ai/server/@sellisd/mcp-units)
+
 An MCP (Model Context Protocol) server that provides cooking unit conversion tools.
 
 ## Installation
 
+### Installing via Smithery
+
+To install Cooking Units Converter for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@sellisd/mcp-units):
+
+```bash
+npx -y @smithery/cli install @sellisd/mcp-units --client claude
+```
+
+### Manual Installation
 1. Clone the repository:
 ```bash
 git clone git@github.com:sellisd/mcp-units.git
