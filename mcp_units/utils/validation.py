@@ -1,6 +1,7 @@
 from decimal import Decimal, InvalidOperation
 from typing import Any, Dict
-from jsonschema import validate, ValidationError
+
+from jsonschema import ValidationError, validate
 from mcp import McpError
 
 # Common schema components
