@@ -1,6 +1,7 @@
 from decimal import Decimal, InvalidOperation
 from typing import Any, Dict
-from jsonschema import validate, ValidationError
+
+from jsonschema import ValidationError, validate
 from mcp import McpError
 
 # Common schema components
@@ -44,6 +45,7 @@ TEMPERATURE_CONVERSION_SCHEMA = {
     "required": ["value", "from_unit", "to_unit"],
     "additionalProperties": False,
 }
+
 
 def validate_conversion_request(data: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """
