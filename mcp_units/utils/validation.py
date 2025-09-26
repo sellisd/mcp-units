@@ -46,6 +46,7 @@ TEMPERATURE_CONVERSION_SCHEMA = {
     "additionalProperties": False,
 }
 
+
 def validate_conversion_request(data: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """
     Validate a conversion request against a schema.

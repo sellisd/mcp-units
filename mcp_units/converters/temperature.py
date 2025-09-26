@@ -1,5 +1,4 @@
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Any, Dict
 
 
 def validate_temperature_unit(unit: str) -> bool:
@@ -10,15 +9,15 @@ def validate_temperature_unit(unit: str) -> bool:
 def convert_temperature(value: float, from_unit: str, to_unit: str) -> Decimal:
     """
     Convert temperature between Celsius and Fahrenheit with precise decimal handling.
-    
+
     Args:
         value: Temperature value to convert
         from_unit: Source unit (C or F)
         to_unit: Target unit (C or F)
-            
+
     Returns:
         Decimal: Converted temperature value rounded to 4 decimal places
-        
+
     Raises:
         ValueError: If conversion fails or input is invalid
     """
