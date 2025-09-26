@@ -5,7 +5,7 @@ import json
 import sys
 from decimal import Decimal
 from enum import Enum
-from typing import Any, AsyncIterator, Dict, Sequence
+from typing import Any, Dict, Sequence
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
