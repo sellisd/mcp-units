@@ -2,7 +2,7 @@
 
 [![smithery badge](https://smithery.ai/badge/@sellisd/mcp-units)](https://smithery.ai/server/@sellisd/mcp-units)
 
-An MCP (Model Context Protocol) server that provides cooking unit conversion tools.
+**MCP Cooking Units Converter** is a Python package and MCP server for converting cooking measurements (volume, weight, temperature) between common units. It is designed for integration with MCP-compatible tools and VSCode extensions.
 
 ## Installation
 
@@ -76,6 +76,10 @@ This MCP server can be integrated with VSCode extensions that support the Model 
      }
    }
    ```
+
+## Contact
+
+For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/sellisd/mcp-units).
 
 ## License
 
