@@ -39,8 +39,8 @@ def convert_weight(
 
     try:
         value_decimal = Decimal(str(value))
-    except:
-        raise ValueError(f"Invalid value: {value}")
+    except (ValueError, TypeError, ArithmeticError) as exc:
+        raise ValueError(f"Invalid value for Decimal conversion: {value}") from exc
 
     if value_decimal < 0:
         raise ValueError("Value cannot be negative")

@@ -27,9 +27,9 @@ def convert_temperature(value: float, from_unit: str, to_unit: str) -> Decimal:
         raise ValueError(f"Invalid target unit: {to_unit}")
 
     try:
-        value_decimal = Decimal(str(value))
-    except:
-        raise ValueError(f"Invalid value: {value}")
+        value_decimal = Decimal(value)
+    except (ValueError, TypeError, ArithmeticError, Decimal.InvalidOperation) as exc:
+        raise ValueError(f"Invalid temperature value '{value}': {exc}") from exc
 
     # Same unit, no conversion needed
     if from_unit == to_unit:
