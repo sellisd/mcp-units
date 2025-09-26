@@ -1,0 +1,22 @@
+name: Lint
+permissions:
+  actions:
+    read
+on:
+  push:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+
+      - name: setup ruff
+        uses: astral-sh/ruff-action@v3
+
+      - name: check
+        run: ruff check --output-format=github .
+
+      - name: format
+        run: ruff format
