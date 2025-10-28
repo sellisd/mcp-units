@@ -27,7 +27,7 @@ dependencies = [
     "pytest>=7.4.4",
     "pytest-asyncio>=0.23.0",
     "ruff>=0.11.5",
-    "mcp==1.18.0",
+    "mcp==1.19.0",
 ]
 
 [project.optional-dependencies]
